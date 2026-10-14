@@ -1,0 +1,35 @@
+{
+  "_aciklama": "Toyota boyahane cati 3D modeli - temel geometri tanimi. Tum px degerleri, el yazisi isaretli havadan gorunus fotografinin duzeltilmis 2000x1500 piksellik cercevesinden okunmustur (y ekseni asagi dogru). Kot (level) degerleri zemin +0.00'a goredir.",
+  "kalibrasyon": {
+    "metre_bolu_piksel": 0.16575,
+    "aciklama": "Ana blok dogu-bati genisligi 1810 px = 300.00 m kabul edilmistir. Gercek bir olcu biliniyorsa SADECE bu sayiyi degistirin, tum model olceklenir.",
+    "orijin_px": [140, 1250],
+    "orijin_aciklama": "Model (0,0) noktasi = ana blogun guneybati kosesi."
+  },
+  "kotlar": {
+    "zemin": 0.0
+  },
+  "bloklar": [
+    {"ad": "A1-BATI-KANADI-KUZEY", "px": [140, 160, 700, 480], "kot": 12.0, "kalinlik": 0.4, "parapet": 1.0, "renk": 254},
+    {"ad": "A2-BATI-KANADI", "px": [140, 480, 595, 960], "kot": 12.0, "kalinlik": 0.4, "parapet": 1.0, "renk": 254},
+    {"ad": "K-KUZEY-EK-BINA", "px": [700, 170, 1255, 480], "kot": 14.0, "kalinlik": 0.4, "parapet": 1.0, "renk": 253},
+    {"ad": "C-ANA-YUKSEK-HOL", "px": [700, 480, 1255, 880], "kot": 16.5, "kalinlik": 0.5, "parapet": 1.2, "renk": 252},
+    {"ad": "D-BATI-TESISAT-GALERISI", "px": [595, 480, 700, 900], "kot": 17.5, "kalinlik": 0.4, "parapet": 1.1, "renk": 32},
+    {"ad": "E-DOGU-TESISAT-GALERISI", "px": [1255, 575, 1310, 900], "kot": 17.5, "kalinlik": 0.4, "parapet": 1.1, "renk": 32},
+    {"ad": "F-GUNEY-BAGLANTI-BANDI", "px": [595, 880, 1255, 960], "kot": 15.0, "kalinlik": 0.4, "parapet": 1.0, "renk": 253},
+    {"ad": "G-DOGU-BLOK-FIRIN-RTO", "px": [1310, 480, 1950, 960], "kot": 13.5, "kalinlik": 0.4, "parapet": 1.0, "renk": 254},
+    {"ad": "H-KUZEY-SERIT", "px": [1280, 380, 1950, 480], "kot": 10.0, "kalinlik": 0.3, "parapet": 0.9, "renk": 253},
+    {"ad": "B-GUNEY-KANADI", "px": [140, 960, 1950, 1250], "kot": 11.0, "kalinlik": 0.4, "parapet": 1.0, "renk": 254}
+  ],
+  "celik_platformlar": [
+    {"ad": "I-330-TEKNIK-PLATFORM", "px": [900, 915, 1035, 1065], "kot": 14.5, "taban_kot": 11.0, "korkuluk": 1.1},
+    {"ad": "I-MERDIVEN-KULESI", "px": [855, 960, 900, 1062], "kot": 14.5, "taban_kot": 0.0, "korkuluk": 1.1}
+  ],
+  "sed_catilar": [
+    {"ad": "G-SED-CATI", "px": [1320, 495, 1700, 545], "taban_kot": 13.9, "tepe_yuksekligi": 3.0, "bolme_sayisi": 12}
+  ],
+  "koprular": [
+    {"ad": "KOPRU-1-GUNEY", "px": [560, 992, 900, 1012], "kot": 13.0, "yukseklik": 2.4},
+    {"ad": "KOPRU-2-HOL-GUNEY", "px": [700, 886, 1255, 906], "kot": 17.2, "yukseklik": 2.4}
+  ]
+}
