@@ -21,12 +21,26 @@ yerleştirilmiş, kodu hem yazı hem de AutoCAD özniteliği olarak işlenmişti
 
 | Dosya | Açıklama |
 |---|---|
-| `toyota_boyahane_cati_3d.dxf` | **Ana dosya.** AutoCAD 2018 (R2018) DXF, 1 birim = 1 **metre** |
-| `toyota_boyahane_cati_3d_mm.dxf` | Aynı model, 1 birim = 1 **milimetre** |
+| `toyota_boyahane_cati_3d.dwg` | **DWG** (AutoCAD 2000 / R2000 formatı), 1 birim = 1 **metre** |
+| `toyota_boyahane_cati_3d_mm.dwg` | **DWG**, 1 birim = 1 **milimetre** |
+| `toyota_boyahane_cati_3d.dxf` | Aynı model, AutoCAD 2018 (R2018) DXF, 1 birim = 1 **metre** |
+| `toyota_boyahane_cati_3d_mm.dxf` | Aynı model, R2018 DXF, 1 birim = 1 **milimetre** |
 | `baca_koordinat_listesi.csv` | Her bacanın kodu, X/Y koordinatı, çatı kotu, yüksekliği, **tepe kotu**, çapı |
 | `onizleme_izometrik.png` / `_2.png` | İzometrik önizlemeler |
 | `onizleme_ustten.png` | Üstten baca yerleşim planı + kodlar (fotoğrafla karşılaştırmak için) |
 | `onizleme_detay_dogu_blok.png` | Doğu blok / RTO bölgesi baca detayı |
+
+### DWG hakkında
+
+DWG dosyaları **GNU LibreDWG** ile üretildi (AutoCAD'in kendi yazıcısı kullanılamadı).
+Format **R2000**'dir, AutoCAD 2000 ve sonraki tüm sürümler açar. Dönüşüm sonrası
+dosya geri okunarak doğrulandı: 77 blok referansı, 385 öznitelik (77 baca kodunun
+tamamı), 194 yazı, 36 katman, 88 polyface mesh, 2 pafta ve 2 viewport eksiksiz.
+Yine de DWG, üçüncü taraf bir dönüştürücünün çıktısıdır — AutoCAD'de bir sorun
+görürseniz **DXF dosyası birebir aynı modeli içerir ve referans alınmalıdır**.
+
+DWG'yi yeniden üretmek için `src/dwg_cevir.sh` (LibreDWG kurulumu betiğin
+başındaki açıklamada anlatılıyor).
 
 AutoCAD'de: `3DORBIT` ile döndürün, `VSCURRENT` → `Conceptual`, `ZOOM` → `E`.
 Hazır **`BACA-YERLESIM-PLANI-A1`** paftası üstten görünüş + seri lejantı + antet içerir.
@@ -66,6 +80,7 @@ pip install ezdxf matplotlib
 python3 src/build_dxf.py                    # metre birimli DXF
 python3 src/build_dxf.py --birim mm --cikti output/toyota_boyahane_cati_3d_mm.dxf
 python3 src/onizleme.py                     # PNG önizlemeler
+sh src/dwg_cevir.sh                         # DWG (LibreDWG/dwgwrite gerekir)
 ```
 
 Model tamamen `data/` klasöründeki iki dosyadan üretilir — DXF'i elle düzeltmek
@@ -77,6 +92,11 @@ yerine bu dosyaları düzeltip betiği tekrar çalıştırın:
   hücreyi değiştirmek. Yeni baca eklemek = yeni satır eklemek.
 - **`data/cati_geometri.json`** — çatı blokları, kotlar, platformlar, sed çatı,
   köprüler ve **ölçek kalibrasyonu**.
+
+> `--surum` seçeneği DXF sürümünü belirler (varsayılan R2018). DWG'ye çevrilecek
+> ara dosyalar **R2004** üretilir: LibreDWG, R2010 ve üstü DXF dosyalarının
+> metinlerini bozuyor (katman adları, yazılar ve öznitelikler tek karaktere
+> kırpılıyor). `src/dwg_cevir.sh` bunu zaten doğru yapar.
 
 ### Ölçeği gerçek değere oturtmak (önemli)
 

@@ -126,7 +126,7 @@ def mesh_ekle(hedef, yuzler, katman):
 
 # ----------------------------------------------------------------------------
 class CatiModeli:
-    def __init__(self, geometri, bacalar, birim="m"):
+    def __init__(self, geometri, bacalar, birim="m", surum="R2018"):
         self.g = geometri
         self.bacalar = bacalar
         self.birim = birim
@@ -145,7 +145,7 @@ class CatiModeli:
         self.seri_renk = {s: SERI_RENKLERI[i % len(SERI_RENKLERI)]
                           for i, s in enumerate(self.seriler)}
 
-        self.doc = ezdxf.new("R2018", setup=True)
+        self.doc = ezdxf.new(surum, setup=True)
         self.doc.units = ezdxf.units.MM if birim == "mm" else ezdxf.units.M
         self.doc.header["$INSUNITS"] = 4 if birim == "mm" else 6
         self.msp = self.doc.modelspace()
@@ -456,7 +456,16 @@ class CatiModeli:
             for r in sorted(self.koordinatlar, key=lambda r: r["baca_kodu"]):
                 w.writerow(r)
 
+    def sinirlari_yaz(self):
+        """Cizim limitleri. ($EXTMIN/$EXTMAX yazilmaz: ezdxf bunlari kasitli
+        olarak sifirlar, CAD programi ilk REGEN / ZOOM E ile kendisi hesaplar.)"""
+        x0, y0, x1, y1 = self.dikdortgen([140, 160, 1950, 1250])
+        pay = self.u(20.0)
+        self.doc.header["$LIMMIN"] = (x0 - pay, y0 - pay)
+        self.doc.header["$LIMMAX"] = (x1 + pay, y1 + pay)
+
     def kaydet(self, yol):
+        self.sinirlari_yaz()
         if "Layout1" in self.doc.layouts.names():
             self.doc.layouts.delete("Layout1")
         x0, y0, x1, y1 = self.dikdortgen([140, 160, 1950, 1250])
@@ -474,6 +483,10 @@ def bacalari_oku(yol):
 def main():
     ap = argparse.ArgumentParser(description="Toyota boyahane cati bacalari 3B DXF")
     ap.add_argument("--birim", choices=["m", "mm"], default="m")
+    ap.add_argument("--surum", default="R2018",
+                    choices=["R2000", "R2004", "R2010", "R2013", "R2018"],
+                    help="DXF surumu. DWG'ye cevrilecek dosyalar icin R2004 "
+                         "kullanin (LibreDWG R2010+ DXF metinlerini bozuyor).")
     ap.add_argument("--cikti", default=os.path.join(
         KOK, "output", "toyota_boyahane_cati_3d.dxf"))
     args = ap.parse_args()
@@ -482,7 +495,7 @@ def main():
         geometri = json.load(f)
     bacalar = bacalari_oku(BACALAR)
 
-    m = CatiModeli(geometri, bacalar, birim=args.birim)
+    m = CatiModeli(geometri, bacalar, birim=args.birim, surum=args.surum)
     m.cati_bloklari()
     m.celik_platformlar()
     m.sed_catilar()
@@ -495,7 +508,8 @@ def main():
     m.koordinat_listesi_yaz(liste)
 
     print("DXF yazildi : {}".format(args.cikti))
-    print("Birim       : 1 birim = 1 {}".format(args.birim))
+    print("Birim       : 1 birim = 1 {}  (DXF surumu: {})".format(
+        args.birim, args.surum))
     print("Baca        : {} adet / {} seri".format(sum(sayac.values()), len(sayac)))
     print("Seriler     : {}".format(dict(sorted(sayac.items()))))
     print("Liste       : {}".format(liste))
