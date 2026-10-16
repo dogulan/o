@@ -502,6 +502,29 @@ def new_doc():
     L.add("GIZLI", color=2, linetype="GIZLI_ISO", lineweight=25)
     L.add("EKSEN", color=1, linetype="EKSEN_ISO", lineweight=18)
     L.add("YAZI", color=3, linetype="Continuous", lineweight=25)
+    L.add("OLCU", color=4, linetype="Continuous", lineweight=18)
+    ds = doc.dimstyles.new("OLCU")
+    ds.dxf.dimscale = 1.0
+    ds.dxf.dimlunit = 2      # ondalık
+    ds.dxf.dimzin = 8        # sondaki sıfırları gizle
+    ds.dxf.dimtofl = 1
+    ds.dxf.dimatfit = 3
+    ds.dxf.dimblk = ""       # dolu kapalı ok
+    ds.dxf.dimtmove = 0      # yazı taşınınca ölçü çizgisi de uzasın
+    ds.dxf.dimtxt = 3.5      # yazı yüksekliği
+    ds.dxf.dimasz = 3.0      # ok boyu
+    ds.dxf.dimexe = 2.0      # yardımcı çizgi taşması
+    ds.dxf.dimexo = 1.0      # yardımcı çizgi boşluğu
+    ds.dxf.dimgap = 1.0
+    ds.dxf.dimdec = 0
+    ds.dxf.dimadec = 0
+    ds.dxf.dimtad = 1        # yazı ölçü çizgisinin üstünde
+    ds.dxf.dimtih = 0        # yazılar ölçü çizgisine paralel (ISO)
+    ds.dxf.dimtoh = 0
+    ds.dxf.dimtxsty = "TR"
+    ds.dxf.dimclrd = 256
+    ds.dxf.dimclre = 256
+    ds.dxf.dimclrt = 256
     return doc
 
 
@@ -520,7 +543,7 @@ def add_prims(msp, prims, layer, dx, dy):
             msp.add_lwpolyline([(x + dx, y + dy) for x, y in p[1]], dxfattribs={"layer": layer})
 
 
-def build(name, title, shape, outdir, gap=30.0):
+def build(name, title, shape, outdir, gap=20.0):
     shape = clean(shape)
     data = {}
     for v in VIEWS:
@@ -529,11 +552,24 @@ def build(name, title, shape, outdir, gap=30.0):
         hid = merge_lines(remove_hidden_under_visible(vis, merge_lines(hid)))
         data[v] = (vis, hid, centerlines(shape, v))
 
+    from olculer import OLCULER
+    olcu = OLCULER[name]()
+
     bb = {v: bbox(data[v][0]) for v in VIEWS}
+    # ölçülerle birlikte dış sınırlar
+    full = {}
+    for v in VIEWS:
+        e = olcu.extents(v)
+        x0, y0, x1, y1 = bb[v]
+        if e:
+            x0, y0, x1, y1 = min(x0, e[0]), min(y0, e[1]), max(x1, e[2]), max(y1, e[3])
+        full[v] = [x0, y0 - 10, x1, y1]   # altta görünüş adı için pay
     # yerleşim: ÖN (0,0) | SOL YAN sağında | ÜST altında
     off = {"ON": (0.0, 0.0)}
-    off["SOL"] = (bb["ON"][2] + gap - bb["SOL"][0], 0.0)
-    off["UST"] = (0.0, bb["ON"][1] - gap - bb["UST"][3])
+    off["SOL"] = (full["ON"][2] + gap - full["SOL"][0], 0.0)
+    off["UST"] = (0.0, full["ON"][1] - gap - full["UST"][3])
+    # ön ve sol yan görünüş adları aynı hizada
+    full["ON"][1] = full["SOL"][1] = min(full["ON"][1], full["SOL"][1])
 
     doc = new_doc()
     msp = doc.modelspace()
@@ -545,12 +581,13 @@ def build(name, title, shape, outdir, gap=30.0):
         add_prims(msp, hid, "GIZLI", dx, dy)
         for a, b in cls:
             msp.add_line((a[0] + dx, a[1] + dy), (b[0] + dx, b[1] + dy), dxfattribs={"layer": "EKSEN"})
-        x0, y0, x1, y1 = bb[v]
+        olcu.render(msp, v, dx, dy)
+        x0, _, x1, _ = bb[v]
         msp.add_text(labels[v], height=3.5, dxfattribs={"layer": "YAZI", "style": "TR"}).set_placement(
-            ((x0 + x1) / 2 + dx, y0 + dy - 12), align=ezdxf.enums.TextEntityAlignment.TOP_CENTER)
+            ((x0 + x1) / 2 + dx, full[v][1] + dy + 4), align=ezdxf.enums.TextEntityAlignment.TOP_CENTER)
     # başlık: sol yan görünüşün altına (üst görünüşle çakışmaz)
-    xl = bb["SOL"][0] + off["SOL"][0]
-    yt = bb["SOL"][1] + off["SOL"][1] - 35
+    xl = full["SOL"][0] + off["SOL"][0]
+    yt = full["SOL"][1] + off["SOL"][1] - 15
     lines = [(f"{name.replace('Parca', 'PARÇA ')} - {title}", 5),
              ("ISO-E (Avrupa) metodu   Ölçek 1:1   Ölçüler mm", 3.5),
              ("Ad Soyad: ....................   No: ..........", 3.5)]

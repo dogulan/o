@@ -13,6 +13,10 @@ sağında, **ÜST** ön görünüşün altında. Ölçek 1:1, birim mm.
 | Parca5 | Sağ – Ø40/Ø26 göbekli A gövdeli yatak (75×112 taban)  |
 | Parca6 | Sağ – Ø50 göbekli, R25 köşeli köşebent (76×126 taban) |
 
+Tüm görünüşler **ölçülendirilmiştir** (OLCU katmanı, ölçü stili `OLCU`: yazı 3.5 mm, ok 3 mm).
+Ölçüler izometrik resimdeki değerlerdir; her ölçü yalnızca bir görünüşte verilmiştir.
+Parça 5'teki "3" ölçüsü (göbek ile gövde yayı arası) R23 olarak verildi (R20 + 3).
+
 **Bakış yönü:** ÖN görünüş = izometrik resimde sağ-alt yüze bakış; SOL YAN = sol-alt yüze bakış.
 
 ## DWG'ye çevirme
@@ -26,6 +30,7 @@ sağında, **ÜST** ön görünüşün altında. Ölçek 1:1, birim mm.
 | GORUNEN | Sürekli      | 0.50     |
 | GIZLI   | Kesik (gizli)| 0.25     |
 | EKSEN   | Noktalı-çizgi| 0.18     |
+| OLCU    | Ölçüler      | 0.18     |
 | YAZI    | –            | 0.25     |
 
 ## Resimde ölçüsü verilmeyen yerler için yapılan kabuller
@@ -36,5 +41,5 @@ sağında, **ÜST** ön görünüşün altında. Ölçek 1:1, birim mm.
 - **Parça 6:** göbek ekseni taban üstünden 38 (Ø50 göbek tabandan 13 yukarıda), göbek ön yüzü duvardan 38 ileride,
   Ø14 delikler kenarlardan 19 ve ön kenardan 25, kaburga 10 kalınlıkta ve göbek önünden taban ön kenarına iner.
 
-`kaynak/uc_gorunus.py` görünüşleri 3B modelden (OpenCascade gizli çizgi hesabı) üretir; ölçü değiştirmek
+`kaynak/uc_gorunus.py` görünüşleri, `kaynak/olculer.py` ölçüleri 3B modelden (OpenCascade gizli çizgi hesabı) üretir; ölçü değiştirmek
 gerekirse ilgili `parcaX()` fonksiyonu düzenlenip `python3 kaynak/uc_gorunus.py dxf` çalıştırılır.
