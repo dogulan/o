@@ -31,6 +31,14 @@ class Olcu:
     def rad(self, view, c, r, ang=45, text="<>", dist=None):
         self.items.append((view, "rad", dict(center=c, radius=r, angle=ang, text=text, dist=dist)))
 
+    def mark(self, view, c, size=4):
+        """Merkez işareti (ör. R50 merkezi)."""
+        self.items.append((view, "mark", dict(center=c, size=size)))
+
+    def lead(self, view, p_arrow, p_text, text):
+        """Oklu açıklama çizgisi (ör. pah ölçüsü 2x45°)."""
+        self.items.append((view, "lead", dict(p1=p_arrow, p2=p_text, text=text)))
+
     def ang(self, view, center, p1, p2, r, text="<>"):
         """p1 -> p2 saat tersi yönündeki açı, r yarıçaplı yay ile."""
         a1 = math.atan2(p1[1] - center[1], p1[0] - center[0])
@@ -53,12 +61,17 @@ class Olcu:
                 pts += [(bx - 5, by - 5), (bx + 5, by + 5)]
             elif kind in ("dia", "rad"):
                 c, r, a = k["center"], k["radius"], math.radians(k["angle"])
-                L = max(r + 16, (k.get("dist") or 0) + 12)
+                L = max(r + 12, (k.get("dist") or 0) + 12)
                 pts = [(c[0] + L * math.cos(a), c[1] + L * math.sin(a))]
                 if kind == "dia":
                     pts.append((c[0] - L * math.cos(a), c[1] - L * math.sin(a)))
             elif kind == "ang":
                 pts = [k["base"], k["p1"], k["p2"]]
+            elif kind == "mark":
+                c, m = k["center"], k["size"]
+                pts = [(c[0] - m, c[1] - m), (c[0] + m, c[1] + m)]
+            elif kind == "lead":
+                pts = [k["p1"], k["p2"], (k["p2"][0] + 4 * len(k["text"]), k["p2"][1] + 4)]
             else:
                 pts = [k["p1"], k["p2"]]
             xs += [p[0] for p in pts]
@@ -78,6 +91,25 @@ class Olcu:
                 d = msp.add_linear_dim(base=sh(k["base"]), p1=sh(k["p1"]), p2=sh(k["p2"]),
                                        angle=k["angle"], text=k["text"], dimstyle="OLCU",
                                        dxfattribs=attr)
+            elif kind == "mark":
+                c, m = k["center"], k["size"]
+                for d0, d1 in (((-m, 0), (m, 0)), ((0, -m), (0, m))):
+                    msp.add_line(sh((c[0] + d0[0], c[1] + d0[1])), sh((c[0] + d1[0], c[1] + d1[1])),
+                                 dxfattribs={"layer": "EKSEN"})
+                continue
+            elif kind == "lead":
+                a, b = k["p1"], k["p2"]
+                L = math.hypot(b[0] - a[0], b[1] - a[1])
+                ux, uy = (b[0] - a[0]) / L, (b[1] - a[1]) / L
+                w = 2.6 * len(k["text"].replace("%%d", "°"))
+                msp.add_line(sh(a), sh(b), dxfattribs=attr)
+                msp.add_line(sh(b), sh((b[0] + w, b[1])), dxfattribs=attr)
+                bs = (a[0] + ux * 3, a[1] + uy * 3)
+                msp.add_solid([sh(a), sh((bs[0] - uy * 0.5, bs[1] + ux * 0.5)),
+                               sh((bs[0] + uy * 0.5, bs[1] - ux * 0.5))], dxfattribs=attr)
+                msp.add_text(k["text"], height=3.5, dxfattribs={"layer": "OLCU", "style": "TR"}
+                             ).set_placement(sh((b[0] + 0.5, b[1] + 1)))
+                continue
             elif kind == "al":
                 d = msp.add_aligned_dim(p1=sh(k["p1"]), p2=sh(k["p2"]), distance=k["distance"],
                                         text=k["text"], dimstyle="OLCU", dxfattribs=attr)
