@@ -9,8 +9,9 @@ from uc_gorunus import line_intersect, offset_line, tangent_point
 
 
 class Olcu:
-    def __init__(self):
+    def __init__(self, k=1.0):
         self.items = []  # (görünüş, tür, parametreler)
+        self.k = k       # çizim ölçeği çarpanı (1:2 için 2): yazı/ok boyları bununla büyür
 
     def h(self, view, p1, p2, at, text="<>"):
         """Yatay ölçü; ölçü çizgisi v=at hizasında."""
@@ -30,6 +31,10 @@ class Olcu:
 
     def rad(self, view, c, r, ang=45, text="<>", dist=None):
         self.items.append((view, "rad", dict(center=c, radius=r, angle=ang, text=text, dist=dist)))
+
+    def circle(self, view, c, r):
+        """Eksen çizgisiyle çember (ör. delik dairesi R15)."""
+        self.items.append((view, "circ", dict(center=c, radius=r)))
 
     def mark(self, view, c, size=4):
         """Merkez işareti (ör. R50 merkezi)."""
@@ -61,7 +66,7 @@ class Olcu:
                 pts += [(bx - 5, by - 5), (bx + 5, by + 5)]
             elif kind in ("dia", "rad"):
                 c, r, a = k["center"], k["radius"], math.radians(k["angle"])
-                L = max(r + 12, (k.get("dist") or 0) + 12)
+                L = max(r + 12 * self.k, (k.get("dist") or 0) + 12 * self.k)
                 pts = [(c[0] + L * math.cos(a), c[1] + L * math.sin(a))]
                 if kind == "dia":
                     pts.append((c[0] - L * math.cos(a), c[1] - L * math.sin(a)))
@@ -70,8 +75,12 @@ class Olcu:
             elif kind == "mark":
                 c, m = k["center"], k["size"]
                 pts = [(c[0] - m, c[1] - m), (c[0] + m, c[1] + m)]
+            elif kind == "circ":
+                c, m = k["center"], k["radius"]
+                pts = [(c[0] - m, c[1] - m), (c[0] + m, c[1] + m)]
             elif kind == "lead":
-                pts = [k["p1"], k["p2"], (k["p2"][0] + 4 * len(k["text"]), k["p2"][1] + 4)]
+                pts = [k["p1"], k["p2"],
+                       (k["p2"][0] + 2.6 * self.k * len(k["text"]), k["p2"][1] + 4 * self.k)]
             else:
                 pts = [k["p1"], k["p2"]]
             xs += [p[0] for p in pts]
@@ -91,6 +100,9 @@ class Olcu:
                 d = msp.add_linear_dim(base=sh(k["base"]), p1=sh(k["p1"]), p2=sh(k["p2"]),
                                        angle=k["angle"], text=k["text"], dimstyle="OLCU",
                                        dxfattribs=attr)
+            elif kind == "circ":
+                msp.add_circle(sh(k["center"]), k["radius"], dxfattribs={"layer": "EKSEN"})
+                continue
             elif kind == "mark":
                 c, m = k["center"], k["size"]
                 for d0, d1 in (((-m, 0), (m, 0)), ((0, -m), (0, m))):
@@ -101,14 +113,15 @@ class Olcu:
                 a, b = k["p1"], k["p2"]
                 L = math.hypot(b[0] - a[0], b[1] - a[1])
                 ux, uy = (b[0] - a[0]) / L, (b[1] - a[1]) / L
-                w = 2.6 * len(k["text"].replace("%%d", "°"))
+                f = self.k
+                w = 2.6 * f * len(k["text"].replace("%%d", "°"))
                 msp.add_line(sh(a), sh(b), dxfattribs=attr)
                 msp.add_line(sh(b), sh((b[0] + w, b[1])), dxfattribs=attr)
-                bs = (a[0] + ux * 3, a[1] + uy * 3)
-                msp.add_solid([sh(a), sh((bs[0] - uy * 0.5, bs[1] + ux * 0.5)),
-                               sh((bs[0] + uy * 0.5, bs[1] - ux * 0.5))], dxfattribs=attr)
-                msp.add_text(k["text"], height=3.5, dxfattribs={"layer": "OLCU", "style": "TR"}
-                             ).set_placement(sh((b[0] + 0.5, b[1] + 1)))
+                bs = (a[0] + ux * 3 * f, a[1] + uy * 3 * f)
+                msp.add_solid([sh(a), sh((bs[0] - uy * 0.5 * f, bs[1] + ux * 0.5 * f)),
+                               sh((bs[0] + uy * 0.5 * f, bs[1] - ux * 0.5 * f))], dxfattribs=attr)
+                msp.add_text(k["text"], height=3.5 * f, dxfattribs={"layer": "OLCU", "style": "TR"}
+                             ).set_placement(sh((b[0] + 0.5 * f, b[1] + f)))
                 continue
             elif kind == "al":
                 d = msp.add_aligned_dim(p1=sh(k["p1"]), p2=sh(k["p2"]), distance=k["distance"],
