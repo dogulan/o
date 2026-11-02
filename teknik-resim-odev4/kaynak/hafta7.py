@@ -283,6 +283,10 @@ def drawing_area(paper, k):
     return (24 * k, 42 * k, (W - 14) * k, (H - 14) * k)
 
 
+CIZEN = "Doğukan Özkan"
+OGRENCI_NO = "25231901023"
+
+
 def frame(msp, title, paper, k, scale_txt):
     W, H = KAGIT[paper]
     S = lambda *p: tuple(v * k for v in p)
@@ -307,6 +311,9 @@ def frame(msp, title, paper, k, scale_txt):
 
     for i, s in enumerate(["Kontrol", "Tarih", "Sınıf - No", "Çizen"]):
         t(s, (ax0 + 1.5, rows[i] + 3.5))
+    # öğrenci bilgileri (antet)
+    t(CIZEN, (c1 + 1.5, rows[3] + 3.5))
+    t(OGRENCI_NO, (c1 + 1.5, rows[2] + 3.5))
     t("Ölçek", ((c2 + c3) / 2, rows[3] + 3.5), al=TextEntityAlignment.MIDDLE_CENTER)
     t(scale_txt, ((c2 + c3) / 2, rows[1] + 3.5), h=3.5, al=TextEntityAlignment.MIDDLE_CENTER)
     t(title, ((c3 + c4) / 2, rows[2]), h=3.5, al=TextEntityAlignment.MIDDLE_CENTER)

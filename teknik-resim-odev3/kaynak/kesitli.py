@@ -294,6 +294,10 @@ def drawing_area(paper):
     return (20 + 4, 10 + 28 + 4, W - 10 - 4, H - 10 - 4)
 
 
+CIZEN = "Doğukan Özkan"
+OGRENCI_NO = "25231901023"
+
+
 def frame(msp, title, paper, scale_txt="1:1"):
     """Yatay çerçeve ve antet (kaynak sayfadaki antete benzer)."""
     W, H = KAGIT[paper]
@@ -317,6 +321,9 @@ def frame(msp, title, paper, scale_txt="1:1"):
         s, height=h, dxfattribs={"layer": "YAZI", "style": "TR"}).set_placement(p, align=al)
     for i, s in enumerate(["Kontrol", "Tarih", "Sınıf - No", "Çizen"]):
         t(s, (ax0 + 1.5, rows[i] + 3.5))
+    # öğrenci bilgileri (antet)
+    t(CIZEN, (c1 + 1.5, rows[3] + 3.5))
+    t(OGRENCI_NO, (c1 + 1.5, rows[2] + 3.5))
     t("Ölçek", ((c2 + c3) / 2, rows[3] + 3.5), al=TextEntityAlignment.MIDDLE_CENTER)
     t(scale_txt, ((c2 + c3) / 2, rows[1] + 3.5), h=3.5, al=TextEntityAlignment.MIDDLE_CENTER)
     t(title, ((c3 + c4) / 2, rows[2]), h=3.5, al=TextEntityAlignment.MIDDLE_CENTER)
