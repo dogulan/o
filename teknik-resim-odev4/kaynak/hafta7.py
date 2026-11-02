@@ -275,7 +275,7 @@ def face_loops(face, view):
     return loops
 
 
-KAGIT = {"A4Y": (297.0, 210.0), "A4D": (210.0, 297.0)}   # yatay / dikey
+KAGIT = {"A4Y": (297.0, 210.0), "A4D": (210.0, 297.0), "A3Y": (420.0, 297.0)}   # yatay / dikey
 
 
 def drawing_area(paper, k):
@@ -311,7 +311,7 @@ def frame(msp, title, paper, k, scale_txt):
     t(scale_txt, ((c2 + c3) / 2, rows[1] + 3.5), h=3.5, al=TextEntityAlignment.MIDDLE_CENTER)
     t(title, ((c3 + c4) / 2, rows[2]), h=3.5, al=TextEntityAlignment.MIDDLE_CENTER)
     t("Resim Numarası", ((c4 + x1) / 2, rows[1] + 3.5), al=TextEntityAlignment.MIDDLE_CENTER)
-    t("A4", (x1 - 2, rows[4] + 3), al=TextEntityAlignment.MIDDLE_RIGHT)
+    t(paper[:2], (x1 - 2, rows[4] + 3), al=TextEntityAlignment.MIDDLE_RIGHT)
 
 
 def section_line(msp, view, axis, c, view_dir, bbv, k, dx, dy, letter="A"):
@@ -351,7 +351,8 @@ def section_line(msp, view, axis, c, view_dir, bbv, k, dx, dy, letter="A"):
             P(lp), align=TextEntityAlignment.MIDDLE_CENTER)
 
 
-def build(name, title, shape, views, section, olcu, outdir, k=1.0, gap=12.0, line_view="UST", notes=()):
+def build(name, title, shape, views, section, olcu, outdir, k=1.0, gap=12.0, line_view="UST", notes=(),
+          papers=("A4Y", "A4D")):
     sec_view, c = section
     axis = 0 if sec_view == "ON" else 1
     shape = clean(shape)
@@ -427,13 +428,13 @@ def build(name, title, shape, views, section, olcu, outdir, k=1.0, gap=12.0, lin
     gy1 = max(full[v][3] + off[v][1] for v in views)
 
     paper = None
-    for p in ("A4Y", "A4D"):
+    for p in papers:
         ax0, ay0, ax1, ay1 = drawing_area(p, k)
         if gx1 - gx0 <= ax1 - ax0 and gy1 - gy0 <= ay1 - ay0:
             paper = p
             break
     if paper is None:
-        paper = "A4D"
+        paper = papers[-1]
         print(f"UYARI {name}: A4'e sığmıyor {gx1 - gx0:.0f} x {gy1 - gy0:.0f}")
     print("  alan", [round(t / k) for t in drawing_area(paper or "A4D", k)])
     ax0, ay0, ax1, ay1 = drawing_area(paper, k)
