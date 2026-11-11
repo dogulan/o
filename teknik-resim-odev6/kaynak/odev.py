@@ -81,7 +81,7 @@ def kesit_cizgisi(msp, bbv, dx, dy, k):
             P((tip[0] - s * 2 * k, tip[1] + 3 * k)), align=TextEntityAlignment.MIDDLE_CENTER)
 
 
-def build(outdir, name="Soru1"):
+def build(outdir, name="Soru2"):
     k = K
     shape = clean(parca_d())
     half = kademeli_kes(shape)
@@ -184,7 +184,58 @@ def build(outdir, name="Soru1"):
     return path
 
 
+def soru_2d(outdir, name="Soru1"):
+    """2D şekil: 56 taban, 86'da R14 kulak, 38/72 kademe, 58'den 28'e eğik kenar, 3 x Ø16 delik."""
+    k = 1.0
+    doc = new_doc()
+    L = doc.layers
+    L.add("CERCEVE", color=7, linetype="Continuous", lineweight=70)
+    L.add("CERCEVE_INCE", color=7, linetype="Continuous", lineweight=25)
+    msp = doc.modelspace()
+    paper = "A4D"
+    h7.frame(msp, "2D ŞEKİL", paper, k, "1:1")
+    W, H = h7.KAGIT[paper]
+    msp.add_text(TARIH, height=2.5, dxfattribs={"layer": "YAZI", "style": "TR"}).set_placement(
+        (W - 10 - 180 + 20 + 1.5, 10 + 7 + 3.5), align=TextEntityAlignment.MIDDLE_LEFT)
+    ax0, ay0, ax1, ay1 = h7.drawing_area(paper, k)
+    ox = (ax0 + ax1) / 2 - 36          # ölçülerle birlikte ortala
+    oy = (ay0 + ay1) / 2 - 50
+    P = lambda x, y: (x + ox, y + oy)
+    g = {"layer": "GORUNEN"}
+    e = {"layer": "EKSEN"}
+    # dış hat: sol alt köşeden saat yönünün tersine
+    pts = [(0, 86), (0, 0), (56, 0), (56, 28), (38, 58), (38, 72), (28, 72), (28, 86)]
+    for a, b in zip(pts, pts[1:]):
+        msp.add_line(P(*a), P(*b), dxfattribs=g)
+    msp.add_arc(P(14, 86), 14, 0, 180, dxfattribs=g)                 # R14
+    for cx, cy, ext in ((14, 86, 17), (14, 14, 11), (42, 14, 11)):
+        msp.add_circle(P(cx, cy), 8, dxfattribs=g)                   # Ø16
+        msp.add_line(P(cx - ext, cy), P(cx + ext, cy), dxfattribs=e)
+        msp.add_line(P(cx, cy - ext), P(cx, cy + ext), dxfattribs=e)
+
+    D = Olcu()
+    D.h("ON", (0, 0), (56, 0), -12)
+    D.v("ON", (0, 0), (0, 86), -12)
+    D.h("ON", (0, 86), (38, 72), 110)
+    D.v("ON", (56, 0), (53, 14), 66)
+    D.v("ON", (56, 0), (56, 28), 74)
+    D.v("ON", (56, 0), (38, 58), 82)
+    D.v("ON", (56, 0), (38, 72), 90)
+    D.h("ON", (0, 14), (14, 25), 32)
+    D.h("ON", (14, 25), (42, 25), 32)
+    D.dia("ON", (14, 14), 8, 225, dist=17)
+    D.dia("ON", (14, 86), 8, 300, dist=17)
+    D.rad("ON", (14, 86), 14, 50)
+    D.render(msp, "ON", ox, oy)
+    doc.set_modelspace_vport(height=H + 10, center=(W / 2, H / 2))
+    path = os.path.join(outdir, f"{name}.dxf")
+    doc.saveas(path)
+    print("yazıldı:", path)
+    return path
+
+
 if __name__ == "__main__":
     outdir = sys.argv[1] if len(sys.argv) > 1 else "."
     os.makedirs(outdir, exist_ok=True)
+    soru_2d(outdir)
     build(outdir)
